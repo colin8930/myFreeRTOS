@@ -96,8 +96,8 @@ void gryo_update()
 	}
 
 	
-	for (int i = 0; i < 3; i++)
-		axes[i] += (float)a[i] *0.01/ 114.285f;  //only need axes[1]
+
+		axes[1] += (float)a[1] *0.0001/ 114.285f;  //only need axes[1]
 	
  // y: axes[1]
 
@@ -155,9 +155,9 @@ GAME_Update()
 
 	if( demoMode == 0 ){
 
-		if( 10>=axes[1]&&axes[1]>=-10 )
+		if( 5>=axes[1]&&axes[1]>=-5 )
 			player1X -= 0;
-		else if (axes[1]>=10)
+		else if (axes[1]>5)
 			player1X += 5;
 		else
 			player1X += -5;
@@ -365,10 +365,38 @@ GAME_Update()
 		}
 	}
 }
+static char* itoa(int value, char* result, int base)
+{
+	if (base < 2 || base > 36) {
+		*result = '\0';
+		return result;
+	}
+	char *ptr = result, *ptr1 = result, tmp_char;
+	int tmp_value;
+
+	do {
+		tmp_value = value;
+		value /= base;
+		*ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz" [35 + (tmp_value - value * base)];
+	} while (value);
+
+	if (tmp_value < 0) *ptr++ = '-';
+	*ptr-- = '\0';
+	while (ptr1 < ptr) {
+		tmp_char = *ptr;
+		*ptr-- = *ptr1;
+		*ptr1++ = tmp_char;
+	}
+	return result;
+}
 
 	void
 GAME_Render()
 {
+	char str[16] = "Y: ";
+	itoa(axes[1], str + 3, 10);
+	LCD_DisplayStringLine(LCD_LINE_6, str);
+
 	LCD_SetTextColor( LCD_COLOR_WHITE );
 	LCD_DrawFullRect( player1X, player1Y, player1W, player1H );
 	LCD_DrawFullRect( player2X, player2Y, player2W, player2H );
