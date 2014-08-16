@@ -4,6 +4,9 @@ EXECUTABLE = $(PROJECT).elf
 BIN_IMAGE = $(PROJECT).bin
 HEX_IMAGE = $(PROJECT).hex
 
+# set the path to STM32F429I-Discovery firmware package
+STDP ?= ../STM32F429I-Discovery_FW_V1.0.1
+
 # Toolchain configurations
 CROSS_COMPILE ?= arm-none-eabi-
 CC = $(CROSS_COMPILE)gcc
@@ -19,6 +22,8 @@ CFLAGS += -mlittle-endian -mthumb
 # Need study
 CFLAGS += -mfpu=fpv4-sp-d16 -mfloat-abi=softfp -O0
 
+
+LDFLAGS =
 define get_library_path
     $(shell dirname $(shell $(CC) $(CFLAGS) -print-file-name=$(1)))
 endef
@@ -36,25 +41,49 @@ CFLAGS += -Wl,--gc-sections
 CFLAGS += -fno-common
 CFLAGS += --param max-inline-insns-single=1000
 
+# FPU
+CFLAGS += -DARM_MATH_CM4 -D__FPU_PRESENT
+
 # specify STM32F429
 CFLAGS += -DSTM32F429_439xx
 
 # to run from FLASH
 CFLAGS += -DVECT_TAB_FLASH
-LDFLAGS += -T $(PWD)/CORTEX_M4F_STM32_DISCOVERY/stm32f429zi_flash.ld
+LDFLAGS += -T $(PWD)/CORTEX_M4F_STM32F407ZG-SK/stm32f429zi_flash.ld
 
 # STARTUP FILE
-OBJS += $(PWD)/CORTEX_M4F_STM32_DISCOVERY/startup_stm32f429_439xx.o
+OBJS += $(PWD)/CORTEX_M4F_STM32F407ZG-SK/startup_stm32f429_439xx.o
 
 # STM32F4xx_StdPeriph_Driver
 CFLAGS += -DUSE_STDPERIPH_DRIVER
 CFLAGS += -D"assert_param(expr)=((void)0)"
 
-#My own config
+# LIB r3d
+CFLAGS += -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK/game/libs/r3d
+OBJS += $(PWD)/CORTEX_M4F_STM32F407ZG-SK/game/libs/r3d/r3d.o
+
+# LIB r3dfb
+CFLAGS += -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK/game/libs/r3dfb-stm32f429-discovery
+OBJS += $(PWD)/CORTEX_M4F_STM32F407ZG-SK/game/libs/r3dfb-stm32f429-discovery/r3dfb.o
+#Game
+OBJS += $(PWD)/CORTEX_M4F_STM32F407ZG-SK/game/game.o
+CFLAGS += -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK/game
+
+CFLAGS += -DUSE_STDPERIPH_DRIVER
+CFLAGS += -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK \
+	  -I $(PWD)/include \
+	  -I $(PWD)/portable/GCC/ARM_CM4F \
+	  -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK/board \
+	  -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/CMSIS/Device/ST/STM32F4xx/Include \
+	  -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/CMSIS/Include \
+	  -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/inc \
+	  -I $(PWD)/Utilities/STM32F429I-Discovery
+
+#My restart
 OBJS += \
-      $(PWD)/CORTEX_M4F_STM32_DISCOVERY/main.o \
-      $(PWD)/CORTEX_M4F_STM32_DISCOVERY/startup/system_stm32f4xx.o \
-      $(PWD)/CORTEX_M4F_STM32_DISCOVERY/stm32f4xx_it.o \
+      $(PWD)/CORTEX_M4F_STM32F407ZG-SK/main.o \
+      $(PWD)/CORTEX_M4F_STM32F407ZG-SK/startup/system_stm32f4xx.o \
+      #$(PWD)/CORTEX_M4F_STM32F407ZG-SK/stm32f4xx_it.o \
 
 OBJS += \
       $(PWD)/croutine.o \
@@ -67,52 +96,54 @@ OBJS += \
       $(PWD)/portable/MemMang/heap_1.o \
 
 OBJS += \
-    $(PWD)/CORTEX_M4F_STM32_DISCOVERY/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.o \
-    $(PWD)/CORTEX_M4F_STM32_DISCOVERY/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_gpio.o \
-    $(PWD)/CORTEX_M4F_STM32_DISCOVERY/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.o \
-    $(PWD)/CORTEX_M4F_STM32_DISCOVERY/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.o \
-    $(PWD)/CORTEX_M4F_STM32_DISCOVERY/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_syscfg.o \
-    $(PWD)/CORTEX_M4F_STM32_DISCOVERY/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_i2c.o \
-    $(PWD)/CORTEX_M4F_STM32_DISCOVERY/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dma.o \
-    $(PWD)/CORTEX_M4F_STM32_DISCOVERY/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_spi.o \
-    $(PWD)/CORTEX_M4F_STM32_DISCOVERY/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_exti.o \
+    $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.o \
+    $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_gpio.o \
+    $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.o \
+    $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.o \
+    $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_syscfg.o \
+    $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_i2c.o \
+			$(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_flash.o \
+    $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dma.o \
+    $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_spi.o \
+    $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_exti.o \
+    $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dma2d.o \
+    $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_ltdc.o \
+    $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_fmc.o \
+			$(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_tim.o \
     $(PWD)/Utilities/STM32F429I-Discovery/stm32f429i_discovery.o \
-    #$(PWD)/CORTEX_M4F_STM32_DISCOVERY/stm32f4xx_it.o
+    $(PWD)/Utilities/STM32F429I-Discovery/stm32f429i_discovery_sdram.o \
+    $(PWD)/Utilities/STM32F429I-Discovery/stm32f429i_discovery_lcd.o \
+    $(PWD)/Utilities/STM32F429I-Discovery/stm32f429i_discovery_ioe.o \
+		 $(PWD)/Utilities/STM32F429I-Discovery/stm32f429i_discovery_l3gd20.o
 
-CFLAGS += -DUSE_STDPERIPH_DRIVER
-CFLAGS += -I $(PWD)/CORTEX_M4F_STM32_DISCOVERY \
-	  -I $(PWD)/include \
-	  -I $(PWD)/portable/GCC/ARM_CM4F \
-	  -I $(PWD)/CORTEX_M4F_STM32_DISCOVERY/board \
-	  -I $(PWD)/CORTEX_M4F_STM32_DISCOVERY/Libraries/CMSIS/Device/ST/STM32F4xx/Include \
-	  -I $(PWD)/CORTEX_M4F_STM32_DISCOVERY/Libraries/CMSIS/Include \
-	  -I $(PWD)/CORTEX_M4F_STM32_DISCOVERY/Libraries/STM32F4xx_StdPeriph_Driver/inc \
-	  -I $(PWD)/Utilities/STM32F429I-Discovery
+
+
+
+
+# L3GD20 default callback
+# CFLAGS += -DUSE_DEFAULT_TIMEOUT_CALLBACK
+
+
+
 
 all: $(BIN_IMAGE)
 
 $(BIN_IMAGE): $(EXECUTABLE)
-	@echo "    OBJCOPY   "$(notdir $@)
-	@$(OBJCOPY) -O binary $^ $@
-	@$(OBJCOPY) -O ihex $^ $(HEX_IMAGE)
-	@echo "    OBJDUMP   "$(notdir $@)
-	@$(OBJDUMP) -h -S -D $(EXECUTABLE) > $(PROJECT).lst
-	@echo "    SIZE      "$(notdir $@)
-	@$(SIZE) $(EXECUTABLE)
+	$(OBJCOPY) -O binary $^ $@
+	$(OBJCOPY) -O ihex $^ $(HEX_IMAGE)
+	$(OBJDUMP) -h -S -D $(EXECUTABLE) > $(PROJECT).lst
+	$(SIZE) $(EXECUTABLE)
 	
 $(EXECUTABLE): $(OBJS)
-	@echo "    LD      "$(notdir $@)
-	@$(LD) -o $@ $(OBJS) \
+	$(LD) -o $@ $(OBJS) \
 		--start-group $(LIBS) --end-group \
 		$(LDFLAGS)
 
 %.o: %.c
-	@echo "    CC      "$(notdir $@)
-	@$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 %.o: %.S
-	@echo "    CC      "$(notdir $@)
-	@$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 flash:
 	st-flash write $(BIN_IMAGE) 0x8000000
