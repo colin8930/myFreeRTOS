@@ -28,6 +28,14 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "game.h"
+#include "stm32f429i_discovery.h"
+#include "stm32f429i_discovery_lcd.h"
+#include "stm32f429i_discovery_l3gd20.h"
+
+#include <r3dfb.h>
+#include <r3d.h>
+
+
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -63,6 +71,9 @@ prvInit()
 
 	//LED
 	STM_EVAL_LEDInit( LED3 );
+	
+	//gryo
+	gryo_init();
 }
 
 static void GameEventTask1( void *pvParameters )
@@ -90,6 +101,7 @@ static void GameTask( void *pvParameters )
 {
 	while( 1 ){
 		GAME_Update();
+		
 		GAME_Render();
 		vTaskDelay( 10 );
 	}

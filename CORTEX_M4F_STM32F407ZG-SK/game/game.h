@@ -2,6 +2,12 @@
 #define GAME_H
 
 void
+gryo_init();
+
+void
+gryo_update();
+
+void
 EventHandler1();
 
 void
