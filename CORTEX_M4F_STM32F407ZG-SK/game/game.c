@@ -106,7 +106,7 @@ void gryo_update()
 void
 BallReset()
 {
-	gryo_init();
+	
 	ballX = ( LCD_PIXEL_WIDTH - 5 ) / 2;
 	ballY = ( LCD_PIXEL_HEIGHT - 5 ) / 2;
 
