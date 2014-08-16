@@ -22,6 +22,8 @@ CFLAGS += -mlittle-endian -mthumb
 # Need study
 CFLAGS += -mfpu=fpv4-sp-d16 -mfloat-abi=softfp -O0
 
+
+LDFLAGS =
 define get_library_path
     $(shell dirname $(shell $(CC) $(CFLAGS) -print-file-name=$(1)))
 endef
@@ -39,6 +41,9 @@ CFLAGS += -Wl,--gc-sections
 CFLAGS += -fno-common
 CFLAGS += --param max-inline-insns-single=1000
 
+# FPU
+CFLAGS += -DARM_MATH_CM4 -D__FPU_PRESENT
+
 # specify STM32F429
 CFLAGS += -DSTM32F429_439xx
 
@@ -52,6 +57,27 @@ OBJS += $(PWD)/CORTEX_M4F_STM32F407ZG-SK/startup_stm32f429_439xx.o
 # STM32F4xx_StdPeriph_Driver
 CFLAGS += -DUSE_STDPERIPH_DRIVER
 CFLAGS += -D"assert_param(expr)=((void)0)"
+
+# LIB r3d
+CFLAGS += -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK/game/libs/r3d
+OBJS += $(PWD)/CORTEX_M4F_STM32F407ZG-SK/game/libs/r3d/r3d.o
+
+# LIB r3dfb
+CFLAGS += -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK/game/libs/r3dfb-stm32f429-discovery
+OBJS += $(PWD)/CORTEX_M4F_STM32F407ZG-SK/game/libs/r3dfb-stm32f429-discovery/r3dfb.o
+#Game
+OBJS += $(PWD)/CORTEX_M4F_STM32F407ZG-SK/game/game.o
+CFLAGS += -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK/game
+
+CFLAGS += -DUSE_STDPERIPH_DRIVER
+CFLAGS += -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK \
+	  -I $(PWD)/include \
+	  -I $(PWD)/portable/GCC/ARM_CM4F \
+	  -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK/board \
+	  -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/CMSIS/Device/ST/STM32F4xx/Include \
+	  -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/CMSIS/Include \
+	  -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/inc \
+	  -I $(PWD)/Utilities/STM32F429I-Discovery
 
 #My restart
 OBJS += \
@@ -76,30 +102,29 @@ OBJS += \
     $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.o \
     $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_syscfg.o \
     $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_i2c.o \
+			$(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_flash.o \
     $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dma.o \
     $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_spi.o \
     $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_exti.o \
     $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dma2d.o \
     $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_ltdc.o \
     $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_fmc.o \
+			$(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_tim.o \
     $(PWD)/Utilities/STM32F429I-Discovery/stm32f429i_discovery.o \
     $(PWD)/Utilities/STM32F429I-Discovery/stm32f429i_discovery_sdram.o \
     $(PWD)/Utilities/STM32F429I-Discovery/stm32f429i_discovery_lcd.o \
-    $(PWD)/Utilities/STM32F429I-Discovery/stm32f429i_discovery_ioe.o
+    $(PWD)/Utilities/STM32F429I-Discovery/stm32f429i_discovery_ioe.o \
+		 $(PWD)/Utilities/STM32F429I-Discovery/stm32f429i_discovery_l3gd20.o
 
-#Game
-OBJS += $(PWD)/CORTEX_M4F_STM32F407ZG-SK/game/game.o
-CFLAGS += -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK/game
 
-CFLAGS += -DUSE_STDPERIPH_DRIVER
-CFLAGS += -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK \
-	  -I $(PWD)/include \
-	  -I $(PWD)/portable/GCC/ARM_CM4F \
-	  -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK/board \
-	  -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/CMSIS/Device/ST/STM32F4xx/Include \
-	  -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/CMSIS/Include \
-	  -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/inc \
-	  -I $(PWD)/Utilities/STM32F429I-Discovery
+
+
+
+# L3GD20 default callback
+# CFLAGS += -DUSE_DEFAULT_TIMEOUT_CALLBACK
+
+
+
 
 all: $(BIN_IMAGE)
 
