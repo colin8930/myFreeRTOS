@@ -74,6 +74,13 @@ prvInit()
 	
 	//gryo
 	gryo_init();
+
+
+	//UART
+	RCC_Configuration();
+  GPIO_Configuration();
+  USART1_Configuration();
+ //USART1_puts("Game test\r\n");
 }
 
 static void GameEventTask1( void *pvParameters )
@@ -82,19 +89,25 @@ static void GameEventTask1( void *pvParameters )
 		GAME_EventHandler1();
 	}
 }
-
+/*
 static void GameEventTask2( void *pvParameters )
 {
 	while( 1 ){
 		GAME_EventHandler2();
 	}
 }
-
+*/
 static void GameEventTask3( void *pvParameters )
 {
 	while( 1 ){
 		GAME_EventHandler3();
 	}
+}
+static void UARTEventTask3( void *pvParameters )
+{
+
+		UART_EventHandler();
+	
 }
 
 static void GameTask( void *pvParameters )
@@ -117,8 +130,9 @@ int main(void)
 
 	xTaskCreate( GameTask, (signed char*) "GameTask", 128, NULL, tskIDLE_PRIORITY + 1, NULL );
 	xTaskCreate( GameEventTask1, (signed char*) "GameEventTask1", 128, NULL, tskIDLE_PRIORITY + 1, NULL );
-	xTaskCreate( GameEventTask2, (signed char*) "GameEventTask2", 128, NULL, tskIDLE_PRIORITY + 1, NULL );
+	//xTaskCreate( GameEventTask2, (signed char*) "GameEventTask2", 128, NULL, tskIDLE_PRIORITY + 1, NULL );
 	xTaskCreate( GameEventTask3, (signed char*) "GameEventTask3", 128, NULL, tskIDLE_PRIORITY + 1, NULL );
+	xTaskCreate( UARTEventTask3, (signed char*) "UARTEventTask3", 128, NULL, tskIDLE_PRIORITY + 1, NULL );
 
 	//Call Scheduler
 	vTaskStartScheduler();

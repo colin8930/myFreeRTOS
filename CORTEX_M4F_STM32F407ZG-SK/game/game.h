@@ -17,9 +17,23 @@ void
 EventHandler3();
 
 void
+UART_EventHandler();
+
+void
 GAME_Update();
 
 void
 GAME_Render();
+
+void 
+RCC_Configuration();
+
+void 
+GPIO_Configuration();
+
+void 
+SART1_Configuration();
+
+void USART1_puts(char*);
 
 #endif
