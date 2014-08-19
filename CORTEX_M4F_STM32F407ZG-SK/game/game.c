@@ -22,7 +22,7 @@ typedef struct {
 	uint8_t u, v;
 } vertex_t;
 
-float axes[3] = {0};
+int axes[3] = {0};
 float time = 0.0f, frametime = 0.0f;
 //Player1
 int16_t player1X = 10;
@@ -99,7 +99,7 @@ void gryo_update()
 
 	
 
-		axes[1] += (float)a[1] *0.0001/ 114.285f;  //only need axes[1]
+		axes[1] = a[1] / 114.285f;  //only need axes[1]
 	
  // y: axes[1]
 
