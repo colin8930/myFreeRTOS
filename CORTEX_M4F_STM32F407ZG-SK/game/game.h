@@ -16,7 +16,7 @@ EventHandler2();
 void
 EventHandler3();
 
-void
+int
 UART_EventHandler();
 
 void
@@ -35,5 +35,9 @@ void
 SART1_Configuration();
 
 void USART1_puts(char*);
+
+int gyro_Mapping(int);
+
+static char* itoa(int, char*, int);
 
 #endif

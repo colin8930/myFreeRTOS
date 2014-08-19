@@ -78,6 +78,14 @@ void gryo_init()
 	L3GD20_FilterCmd(L3GD20_HIGHPASSFILTER_ENABLE);
 }
 
+
+int gyro_Mapping(int axis)
+{
+
+		return axis*0.1;
+
+}
+
 //gyro updata
 void gryo_update()
 {
@@ -154,15 +162,16 @@ GAME_Update()
 	LCD_SetTextColor( LCD_COLOR_BLACK );
 	LCD_DrawFullRect( player1X, player1Y, player1W, player1H );
 	LCD_DrawFullRect( player2X, player2Y, player2W, player2H );
-
+	//char str[5];
 	if( demoMode == 0 ){
 
-		if( 5>=axes[1]&&axes[1]>=-5 )
-			player1X -= 0;
-		else if (axes[1]>5)
-			player1X += 5;
-		else
-			player1X += -5;
+
+/*   for debug
+		itoa(axes[1], str, 10);
+		USART1_puts(str);
+		USART1_puts('\n');  */
+		
+			player1X += gyro_Mapping(axes[1]);
 
 		if( player1X <= 0 )
 			player1X = 0;
@@ -476,25 +485,57 @@ void USART1_puts(char* s)
 
 /**************************************************************************************/
 
-void
-UART_EventHandler()
+int
+UART_EventHandler1()  //for game
 {
-					while(1)
-    {
+				//USART_SendData(USART1, '2');
         while(USART_GetFlagStatus(USART1, USART_FLAG_RXNE) == RESET);
         char t = USART_ReceiveData(USART1);
 					arrowKey=t;
+					if(arrowKey=='p')  
+					{
+						USART_SendData(USART1, t);
+						return 1;  // return stop cmd
+ 					}
+       if ((t == '\r')) {
+            while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
+            USART_SendData(USART1, t);
+								arrowKey=t;
+								if(arrowKey=='p')  
+							{
+							USART_SendData(USART1, t);
+							return 1;  // return stop cmd
+           
+								}
+ t = '\n';
+      				}
+					return -1;
+}
+
+int
+UART_EventHandler()  //for Shell UART
+{
+				//USART_SendData(USART1, '1');
+        while(USART_GetFlagStatus(USART1, USART_FLAG_RXNE) == RESET);
+        char t = USART_ReceiveData(USART1);
+					arrowKey=t;
+					if(arrowKey=='s') 
+					{
+						USART_SendData(USART1, t);
+ 						return 0;  // return stop cmd
+					}
         if ((t == '\r')) {
             while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
             USART_SendData(USART1, t);
 								arrowKey=t;
-            t = '\n';
-        }
-        while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
-        USART_SendData(USART1, t);
-						arrowKey=t;
-    }
-
-    while(1); // Don't want to exit
+								if(arrowKey=='s')  
+{
+							USART_SendData(USART1, t);
+							return 0;  // return stop cmd
 }
+            t = '\n';
+      				}
+					return -1;
+}
+
 
