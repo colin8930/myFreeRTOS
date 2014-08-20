@@ -159,11 +159,10 @@ static void UARTEventTask( void *pvParameters )  //UART for shell
 			SUART_Return=UART_EventHandler();
 			if(SUART_Return==0)
 			{
-				xTaskCreate( GameTask, (signed char*) "GameEventTask1", 128, NULL, tskIDLE_PRIORITY + 1, &xgame1Task );
-				xTaskCreate( GameEventTask1, (signed char*) "GameEventTask1", 128, NULL, tskIDLE_PRIORITY + 1, &xgame2Task );
-				//xTaskCreate( GameEventTask2, (signed char*) "GameEventTask2", 128, NULL, tskIDLE_PRIORITY + 1, NULL );
-				xTaskCreate( GameEventTask3, (signed char*) "GameEventTask3", 128, NULL, tskIDLE_PRIORITY + 1, &xgame3Task );
-				xTaskCreate( UARTEventTask1, (signed char*) "UARTEventTask1", 128, NULL, tskIDLE_PRIORITY + 1, &xTest2Task );  //for game
+				vTaskResume(xgame1Task);
+				vTaskResume(xgame2Task);
+				vTaskResume(xgame3Task);
+				vTaskResume(xTest2Task);
 				vTaskSuspend(xTest1Task);		
 				SUART_Return=1;
 						
@@ -180,7 +179,8 @@ static void UARTEventTask1( void *pvParameters )  //for game
 		GUART_Return=UART_EventHandler1();
 		if(GUART_Return==1)
 		{
-				xTaskCreate( UARTEventTask, (signed char*) "UARTEventTask", 128, NULL, tskIDLE_PRIORITY + 1, &xTest1Task );	//for UART
+				
+				vTaskResume(xTest1Task);
 				vTaskSuspend(xgame1Task);
 				vTaskSuspend(xgame2Task);
 				vTaskSuspend(xgame3Task);
@@ -203,8 +203,15 @@ int main(void)
 		xTaskCreate( ShellEventTask, (signed char*) "ShellEventTask", 128, NULL, tskIDLE_PRIORITY + 1, &xTest3Task );  //for shell
 		
 		xTaskCreate( UARTEventTask, (signed char*) "UARTEventTask", 128, NULL, tskIDLE_PRIORITY + 1, &xTest1Task );	//for UART		
-
-		
+		xTaskCreate( GameTask, (signed char*) "GameEventTask1", 128, NULL, tskIDLE_PRIORITY + 1, &xgame1Task );
+		xTaskCreate( GameEventTask1, (signed char*) "GameEventTask1", 128, NULL, tskIDLE_PRIORITY + 1, &xgame2Task );
+		//xTaskCreate( GameEventTask2, (signed char*) "GameEventTask2", 128, NULL, tskIDLE_PRIORITY + 1, NULL );
+		xTaskCreate( GameEventTask3, (signed char*) "GameEventTask3", 128, NULL, tskIDLE_PRIORITY + 1, &xgame3Task );
+		xTaskCreate( UARTEventTask1, (signed char*) "UARTEventTask1", 128, NULL, tskIDLE_PRIORITY + 1, &xTest2Task );  //for game
+		vTaskSuspend(xgame1Task);
+		vTaskSuspend(xgame2Task);
+		vTaskSuspend(xgame3Task);
+		vTaskSuspend(xTest2Task);
 		vTaskStartScheduler();	
 		
 	//Call Scheduler
